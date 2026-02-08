@@ -1,0 +1,4 @@
+exports_files(
+    ["exchange_config.yaml"],
+    visibility = ["//visibility:public"],
+)

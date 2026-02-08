@@ -1,0 +1,30 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Aggregate library — all modules
+cc_library(
+    name = "sim_cme_exchange_lib",
+    includes = ["."],
+    deps = [
+        "//src/common",
+        "//src/config",
+        "//src/engine",
+        "//src/fixp",
+        "//src/gateway",
+        "//src/instruments",
+        "//src/market_data",
+        "//src/network",
+        "//src/sbe",
+    ],
+)
+
+# Main executable
+cc_binary(
+    name = "sim_cme_exchange",
+    srcs = ["main.cpp"],
+    data = ["//config:exchange_config.yaml"],
+    deps = [
+        ":sim_cme_exchange_lib",
+    ],
+)

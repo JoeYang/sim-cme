@@ -1,0 +1,36 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "market_data",
+    srcs = [
+        "channel_publisher.cpp",
+        "feed_sender.cpp",
+        "incremental_builder.cpp",
+        "instrument_def_builder.cpp",
+        "market_data_publisher.cpp",
+        "snapshot_builder.cpp",
+        "snapshot_cycler.cpp",
+    ],
+    hdrs = [
+        "channel_publisher.h",
+        "feed_sender.h",
+        "incremental_builder.h",
+        "instrument_def_builder.h",
+        "market_data_publisher.h",
+        "snapshot_builder.h",
+        "snapshot_cycler.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:asio_compat",
+        "//src/common:common_base",
+        "//src/common:logger",
+        "//src/config",
+        "//src/engine",
+        "//src/instruments",
+        "//src/network",
+        "//src/sbe",
+    ],
+)

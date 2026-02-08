@@ -1,0 +1,35 @@
+# Build output
+build/
+cmake-build-*/
+
+# Bazel
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-sim-cme-exchange
+MODULE.bazel.lock
+
+# Generated SBE codecs
+generated/
+
+# IDE / editor
+.cache/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Compiled objects / binaries
+*.o
+*.a
+*.so
+*.dylib
+compile_commands.json
+
+# Logs
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

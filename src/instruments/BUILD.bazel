@@ -1,0 +1,22 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "instruments",
+    srcs = [
+        "instrument_manager.cpp",
+        "security_status_machine.cpp",
+    ],
+    hdrs = [
+        "channel.h",
+        "instrument.h",
+        "instrument_manager.h",
+        "security_status_machine.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:common_base",
+        "//src/config",
+    ],
+)

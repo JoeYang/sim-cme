@@ -1,0 +1,29 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "engine",
+    srcs = [
+        "full_matching_engine.cpp",
+        "order_book.cpp",
+        "pcap_reader.cpp",
+        "synthetic_engine.cpp",
+    ],
+    hdrs = [
+        "engine_event.h",
+        "full_matching_engine.h",
+        "matching_engine.h",
+        "order.h",
+        "order_book.h",
+        "pcap_reader.h",
+        "price_level.h",
+        "synthetic_engine.h",
+        "trade.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:common_base",
+        "//src/sbe",
+    ],
+)

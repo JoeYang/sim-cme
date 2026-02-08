@@ -1,0 +1,25 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "network",
+    srcs = [
+        "io_context_pool.cpp",
+        "tcp_acceptor.cpp",
+        "tcp_connection.cpp",
+        "udp_multicast_sender.cpp",
+    ],
+    hdrs = [
+        "io_context_pool.h",
+        "tcp_acceptor.h",
+        "tcp_connection.h",
+        "udp_multicast_sender.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:asio_compat",
+        "//src/common:common_base",
+        "//src/common:logger",
+    ],
+)

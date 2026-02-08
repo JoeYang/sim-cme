@@ -1,0 +1,25 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "fixp",
+    srcs = [
+        "session.cpp",
+        "session_manager.cpp",
+    ],
+    hdrs = [
+        "hmac_authenticator.h",
+        "retransmit_buffer.h",
+        "session.h",
+        "session_manager.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:common_base",
+        "//src/common:logger",
+        "//src/sbe",
+        "@openssl//:crypto",
+        "@openssl//:ssl",
+    ],
+)

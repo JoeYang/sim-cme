@@ -1,0 +1,21 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "ilink3_client",
+    srcs = ["ilink3_client.cpp"],
+    deps = [
+        "//src/common:asio_compat",
+        "//src/common:common_base",
+        "//src/sbe",
+    ],
+)
+
+cc_binary(
+    name = "mdp3_listener",
+    srcs = ["mdp3_listener.cpp"],
+    deps = [
+        "//src/common:asio_compat",
+        "//src/common:common_base",
+        "//src/sbe",
+    ],
+)

@@ -1,0 +1,40 @@
+# ---- C++20 globally ----
+build --cxxopt=-std=c++20
+build --host_cxxopt=-std=c++20
+
+# ---- Warnings for project sources only (not third-party) ----
+build --per_file_copt=//src/...,//tests/...,//tools/...@-Wall,-Wextra,-Wpedantic,-Wno-unused-parameter
+
+# ---- Optimized build ----
+build:opt --copt=-O2
+build:opt --copt=-DNDEBUG
+build:opt --copt=-march=native
+
+# ---- Debug build ----
+build:dbg --copt=-g
+build:dbg --copt=-O0
+build:dbg --strip=never
+
+# ---- AddressSanitizer ----
+build:asan --copt=-fsanitize=address
+build:asan --copt=-fno-omit-frame-pointer
+build:asan --copt=-O1
+build:asan --linkopt=-fsanitize=address
+
+# ---- ThreadSanitizer ----
+build:tsan --copt=-fsanitize=thread
+build:tsan --copt=-fno-omit-frame-pointer
+build:tsan --copt=-O1
+build:tsan --linkopt=-fsanitize=thread
+
+# ---- UndefinedBehaviorSanitizer ----
+build:ubsan --copt=-fsanitize=undefined
+build:ubsan --copt=-fno-omit-frame-pointer
+build:ubsan --copt=-O1
+build:ubsan --linkopt=-fsanitize=undefined
+
+# ---- Bazel 9 compatibility (autoload native rules for external deps) ----
+build --incompatible_autoload_externally=+cc_library,+cc_binary,+cc_test
+
+# ---- Misc ----
+test --test_output=errors

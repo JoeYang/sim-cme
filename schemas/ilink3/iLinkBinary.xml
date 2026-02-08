@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="iLink3"
+                   id="8"
+                   version="8"
+                   semanticVersion="FIX5.0SP2"
+                   description="iLink 3 Binary Order Entry"
+                   byteOrder="littleEndian">
+
+    <!-- ==================== Types ==================== -->
+    <types>
+        <!-- Standard SBE message header -->
+        <composite name="messageHeader" description="SBE message header">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId"  primitiveType="uint16"/>
+            <type name="schemaId"    primitiveType="uint16"/>
+            <type name="version"     primitiveType="uint16"/>
+        </composite>
+
+        <!-- Repeating group header -->
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup"  primitiveType="uint8"/>
+        </composite>
+
+        <!-- Variable-length string encoding -->
+        <composite name="varStringEncoding">
+            <type name="length"  primitiveType="uint16" maxValue="1024"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+
+        <!-- Simple Open Framing Header -->
+        <composite name="sofh" description="Simple Open Framing Header">
+            <type name="messageLength"    primitiveType="uint32"/>
+            <type name="encodingType"     primitiveType="uint16"/>
+        </composite>
+
+        <!-- Fixed-point decimal: price * 10^-9 -->
+        <composite name="PRICENULL9" description="Price with 9 decimal places">
+            <type name="mantissa" primitiveType="int64" presence="optional" nullValue="9223372036854775807"/>
+            <type name="exponent" primitiveType="int8" presence="constant">-9</type>
+        </composite>
+
+        <!-- Fixed-point decimal: price * 10^-7 for iLink order entry -->
+        <composite name="PRICE9" description="Optional Price 9 decimals">
+            <type name="mantissa" primitiveType="int64" presence="optional" nullValue="9223372036854775807"/>
+            <type name="exponent" primitiveType="int8" presence="constant">-9</type>
+        </composite>
+
+        <type name="uInt8"   primitiveType="uint8"/>
+        <type name="uInt16"  primitiveType="uint16"/>
+        <type name="uInt32"  primitiveType="uint32"/>
+        <type name="uInt64"  primitiveType="uint64"/>
+        <type name="Int32"   primitiveType="int32"/>
+        <type name="Int64"   primitiveType="int64"/>
+        <type name="char"    primitiveType="char"/>
+        <type name="String20" primitiveType="char" length="20"/>
+        <type name="String3"  primitiveType="char" length="3"/>
+        <type name="String5"  primitiveType="char" length="5"/>
+        <type name="String7"  primitiveType="char" length="7"/>
+        <type name="String8"  primitiveType="char" length="8"/>
+        <type name="String12" primitiveType="char" length="12"/>
+        <type name="String20" primitiveType="char" length="20"/>
+        <type name="String30" primitiveType="char" length="30"/>
+        <type name="String50" primitiveType="char" length="50"/>
+        <type name="UUID"    primitiveType="uint64" description="Session UUID"/>
+
+        <type name="uInt8NULL" primitiveType="uint8" presence="optional" nullValue="255"/>
+        <type name="uInt16NULL" primitiveType="uint16" presence="optional" nullValue="65535"/>
+        <type name="uInt32NULL" primitiveType="uint32" presence="optional" nullValue="4294967295"/>
+        <type name="uInt64NULL" primitiveType="uint64" presence="optional" nullValue="18446744073709551615"/>
+
+        <!-- Enums -->
+        <enum name="SideReq" encodingType="uint8">
+            <validValue name="Buy">1</validValue>
+            <validValue name="Sell">2</validValue>
+        </enum>
+
+        <enum name="OrdTypeReq" encodingType="uint8">
+            <validValue name="MarketWithProtection">1</validValue>
+            <validValue name="Limit">2</validValue>
+            <validValue name="StopLimit">3</validValue>
+            <validValue name="StopWithProtection">4</validValue>
+        </enum>
+
+        <enum name="TimeInForceReq" encodingType="uint8">
+            <validValue name="Day">0</validValue>
+            <validValue name="GoodTillCancel">1</validValue>
+            <validValue name="FillAndKill">3</validValue>
+            <validValue name="FillOrKill">4</validValue>
+            <validValue name="GoodTillDate">6</validValue>
+        </enum>
+
+        <enum name="ExecTyp" encodingType="char">
+            <validValue name="New">0</validValue>
+            <validValue name="Canceled">4</validValue>
+            <validValue name="Replaced">5</validValue>
+            <validValue name="Trade">F</validValue>
+            <validValue name="Rejected">8</validValue>
+        </enum>
+
+        <enum name="OrdStatusReq" encodingType="uint8">
+            <validValue name="New">0</validValue>
+            <validValue name="PartiallyFilled">1</validValue>
+            <validValue name="Filled">2</validValue>
+            <validValue name="Canceled">4</validValue>
+            <validValue name="Replaced">5</validValue>
+            <validValue name="Rejected">8</validValue>
+        </enum>
+
+        <enum name="ManualOrdIndReq" encodingType="uint8">
+            <validValue name="Automated">0</validValue>
+            <validValue name="Manual">1</validValue>
+        </enum>
+
+        <enum name="SplitMsg" encodingType="uint8">
+            <validValue name="SplitMessageDelayed">0</validValue>
+            <validValue name="OutOfOrderMessageDelayed">1</validValue>
+            <validValue name="CompleteMessage">2</validValue>
+        </enum>
+
+        <enum name="BooleanFlag" encodingType="uint8">
+            <validValue name="False">0</validValue>
+            <validValue name="True">1</validValue>
+        </enum>
+
+        <enum name="CxlRejRsn" encodingType="uint16">
+            <validValue name="TooLateToCancel">0</validValue>
+            <validValue name="UnknownOrder">1</validValue>
+            <validValue name="BrokerExchangeOption">2</validValue>
+            <validValue name="PendingCancelOrReplace">3</validValue>
+        </enum>
+
+        <set name="ExecAckStatus" encodingType="uint8">
+            <choice name="Accepted">0</choice>
+            <choice name="Rejected">1</choice>
+        </set>
+    </types>
+
+    <!-- ==================== Session Messages ==================== -->
+
+    <!-- Negotiate (client -> exchange) -->
+    <sbe:message name="Negotiate500" id="500" description="Initiate session negotiation" blockLength="76">
+        <field name="HMACSignature" id="9005" type="String30" offset="0" description="HMAC signature"/>
+        <field name="AccessKeyID"   id="9004" type="String20" offset="30" description="Access key"/>
+        <field name="UUID"          id="39001" type="UUID" offset="50" description="Session UUID"/>
+        <field name="RequestTimestamp" id="39002" type="uInt64" offset="58" description="Time of request in ns"/>
+        <field name="Session"       id="39003" type="String3" offset="66" description="Market segment"/>
+        <field name="Firm"          id="39004" type="String5" offset="69" description="Firm ID"/>
+    </sbe:message>
+
+    <!-- NegotiationResponse (exchange -> client) -->
+    <sbe:message name="NegotiationResponse501" id="501" description="Negotiation accepted" blockLength="30">
+        <field name="UUID"           id="39001" type="UUID" offset="0"/>
+        <field name="RequestTimestamp" id="39002" type="uInt64" offset="8"/>
+        <field name="SecretKeySecureIDExpiration" id="39022" type="uInt16" offset="16"/>
+        <field name="FaultToleranceIndicator" id="39023" type="uInt8" offset="18"/>
+        <field name="SplitMsg"       id="9553" type="SplitMsg" offset="19"/>
+        <field name="PreviousSeqNo"  id="39021" type="uInt32" offset="20"/>
+        <field name="PreviousUUID"   id="39015" type="UUID" offset="24"/>
+    </sbe:message>
+
+    <!-- Establish (client -> exchange) -->
+    <sbe:message name="Establish503" id="503" description="Establish the session" blockLength="76">
+        <field name="HMACSignature"    id="9005" type="String30" offset="0"/>
+        <field name="AccessKeyID"      id="9004" type="String20" offset="30"/>
+        <field name="UUID"             id="39001" type="UUID" offset="50"/>
+        <field name="RequestTimestamp" id="39002" type="uInt64" offset="58"/>
+        <field name="NextSeqNo"        id="39013" type="uInt32" offset="66"/>
+        <field name="Session"          id="39003" type="String3" offset="70"/>
+        <field name="Firm"             id="39004" type="String5" offset="73"/>
+    </sbe:message>
+
+    <!-- EstablishmentAck (exchange -> client) -->
+    <sbe:message name="EstablishmentAck504" id="504" description="Session established" blockLength="32">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="RequestTimestamp"  id="39002" type="uInt64" offset="8"/>
+        <field name="NextSeqNo"         id="39013" type="uInt32" offset="16"/>
+        <field name="PreviousSeqNo"     id="39021" type="uInt32" offset="20"/>
+        <field name="PreviousUUID"      id="39015" type="UUID" offset="24"/>
+        <field name="KeepAliveInterval" id="39014" type="uInt16" offset="32" description="Millis"/>
+    </sbe:message>
+
+    <!-- Sequence (bidirectional keepalive) -->
+    <sbe:message name="Sequence506" id="506" description="Heartbeat / sequence" blockLength="12">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="NextSeqNo"         id="39013" type="uInt32" offset="8"/>
+        <field name="FaultToleranceIndicator" id="39023" type="uInt8" offset="12"/>
+        <field name="KeepAliveIntervalLapsed" id="39016" type="BooleanFlag" offset="13"/>
+    </sbe:message>
+
+    <!-- Terminate (bidirectional) -->
+    <sbe:message name="Terminate507" id="507" description="Terminate session" blockLength="24">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="RequestTimestamp"  id="39002" type="uInt64" offset="8"/>
+        <field name="ErrorCodes"        id="39030" type="uInt16" offset="16"/>
+        <field name="SplitMsg"          id="9553" type="SplitMsg" offset="18"/>
+    </sbe:message>
+
+    <!-- RetransmitRequest (client -> exchange) -->
+    <sbe:message name="RetransmitRequest508" id="508" description="Request retransmission" blockLength="28">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="LastUUID"          id="39025" type="uInt64NULL" offset="8"/>
+        <field name="RequestTimestamp"  id="39002" type="uInt64" offset="16"/>
+        <field name="FromSeqNo"         id="39027" type="uInt32" offset="24"/>
+        <field name="MsgCount"          id="39028" type="uInt16" offset="28"/>
+    </sbe:message>
+
+    <!-- Retransmission (exchange -> client) -->
+    <sbe:message name="Retransmission509" id="509" description="Retransmission response" blockLength="24">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="LastUUID"          id="39025" type="uInt64NULL" offset="8"/>
+        <field name="RequestTimestamp"  id="39002" type="uInt64" offset="16"/>
+        <field name="FromSeqNo"         id="39027" type="uInt32" offset="24"/>
+        <field name="MsgCount"          id="39028" type="uInt16" offset="28"/>
+    </sbe:message>
+
+    <!-- NotApplied (exchange -> client) -->
+    <sbe:message name="NotApplied513" id="513" description="Gap detected notification" blockLength="16">
+        <field name="UUID"              id="39001" type="UUID" offset="0"/>
+        <field name="FromSeqNo"         id="39027" type="uInt32" offset="8"/>
+        <field name="MsgCount"          id="39028" type="uInt32" offset="12"/>
+    </sbe:message>
+
+    <!-- ==================== Application Messages ==================== -->
+
+    <!-- NewOrderSingle (client -> exchange) -->
+    <sbe:message name="NewOrderSingle514" id="514" description="Submit new order" blockLength="118">
+        <field name="Price"                 id="44"    type="PRICE9" offset="0"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="8"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="12"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="16"/>
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="17"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="21"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="41"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="61"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="69"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="77"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="85"/>
+        <field name="Location"              id="9537"  type="String5" offset="93"/>
+        <field name="MinQty"                id="110"   type="uInt32NULL" offset="98"/>
+        <field name="DisplayQty"            id="1138"  type="uInt32NULL" offset="102"/>
+        <field name="ExpireDate"            id="432"   type="uInt16NULL" offset="106"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="108"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="109"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="110"/>
+        <field name="ExecInst"              id="18"    type="uInt8" offset="111" description="ExecInst bitfield"/>
+        <field name="ExecutionMode"         id="5906"  type="uInt8" offset="112"/>
+        <field name="LiquidityFlag"         id="9373"  type="BooleanFlag" offset="113"/>
+        <field name="ManagedOrder"          id="6881"  type="BooleanFlag" offset="114"/>
+        <field name="ShortSaleType"         id="5409"  type="uInt8" offset="115"/>
+    </sbe:message>
+
+    <!-- OrderCancelReplaceRequest (client -> exchange) -->
+    <sbe:message name="OrderCancelReplaceRequest515" id="515" description="Modify existing order" blockLength="120">
+        <field name="Price"                 id="44"    type="PRICE9" offset="0"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="8"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="12"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="16"/>
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="17"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="21"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="41"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="61"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="69"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="77"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="85"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="93"/>
+        <field name="Location"              id="9537"  type="String5" offset="101"/>
+        <field name="MinQty"                id="110"   type="uInt32NULL" offset="106"/>
+        <field name="DisplayQty"            id="1138"  type="uInt32NULL" offset="110"/>
+        <field name="ExpireDate"            id="432"   type="uInt16NULL" offset="114"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="116"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="117"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="118"/>
+        <field name="OFMOverride"           id="9768"  type="uInt8" offset="119"/>
+    </sbe:message>
+
+    <!-- OrderCancelRequest (client -> exchange) -->
+    <sbe:message name="OrderCancelRequest516" id="516" description="Cancel order" blockLength="96">
+        <field name="OrderID"               id="37"    type="uInt64" offset="0"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="8"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="16"/>
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="17"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="21"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="41"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="61"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="69"/>
+        <field name="Location"              id="9537"  type="String5" offset="77"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="82"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="86"/>
+        <field name="LiquidityFlag"         id="9373"  type="BooleanFlag" offset="87"/>
+    </sbe:message>
+
+    <!-- MassQuote (client -> exchange) -->
+    <sbe:message name="MassQuote517" id="517" description="Mass quote" blockLength="78">
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="0"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="8"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="16"/>
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="17"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="21"/>
+        <field name="Location"              id="9537"  type="String5" offset="41"/>
+        <field name="QuoteReqID"            id="131"   type="uInt64" offset="46"/>
+        <field name="TotNoQuoteEntries"     id="304"   type="uInt8" offset="54"/>
+        <field name="MMProtectionReset"     id="9773"  type="BooleanFlag" offset="55"/>
+        <field name="LiquidityFlag"         id="9373"  type="BooleanFlag" offset="56"/>
+        <field name="ShortSaleType"         id="5409"  type="uInt8" offset="57"/>
+        <group name="NoQuoteEntries" id="295" dimensionType="groupSizeEncoding" blockLength="32">
+            <field name="BidPx"         id="132"  type="PRICE9" offset="0"/>
+            <field name="OfferPx"       id="133"  type="PRICE9" offset="8"/>
+            <field name="BidSize"       id="134"  type="uInt32" offset="16"/>
+            <field name="OfferSize"     id="135"  type="uInt32" offset="20"/>
+            <field name="SecurityID"    id="48"   type="Int32" offset="24"/>
+            <field name="QuoteEntryID"  id="299"  type="uInt32" offset="28"/>
+        </group>
+    </sbe:message>
+
+    <!-- ExecutionReportNew (exchange -> client) -->
+    <sbe:message name="ExecutionReportNew522" id="522" description="New order acknowledgement" blockLength="124">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="116"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="117"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="118"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="122"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="126"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="127"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="128"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="129"/>
+        <field name="Location"              id="9537"  type="String5" offset="130"/>
+    </sbe:message>
+
+    <!-- ExecutionReportReject (exchange -> client) -->
+    <sbe:message name="ExecutionReportReject523" id="523" description="Order rejected" blockLength="132">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="116"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="120"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="124"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="125"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="126"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="127"/>
+        <field name="OrdRejReason"          id="103"   type="uInt16" offset="128"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="130"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="131"/>
+        <field name="Location"              id="9537"  type="String5" offset="132"/>
+    </sbe:message>
+
+    <!-- ExecutionReportElimination (exchange -> client) -->
+    <sbe:message name="ExecutionReportElimination524" id="524" description="Order eliminated (IOC/FOK)" blockLength="140">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="CumQty"                id="14"    type="uInt32" offset="116"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="120"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="124"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="128"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="129"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="130"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="131"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="132"/>
+        <field name="Location"              id="9537"  type="String5" offset="133"/>
+    </sbe:message>
+
+    <!-- ExecutionReportTradeOutright (exchange -> client) -->
+    <sbe:message name="ExecutionReportTradeOutright525" id="525" description="Trade (fill)" blockLength="156">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="SecExecID"             id="5765"  type="uInt64" offset="116"/>
+        <field name="LastQty"               id="32"    type="uInt32" offset="124"/>
+        <field name="LastPx"                id="31"    type="PRICE9" offset="128"/>
+        <field name="CumQty"                id="14"    type="uInt32" offset="136"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="140"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="144"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="148"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="149"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="150"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="151"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="152"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="153"/>
+        <field name="AggressorIndicator"    id="1057"  type="BooleanFlag" offset="154"/>
+        <field name="Location"              id="9537"  type="String5" offset="155"/>
+        <group name="NoFills" id="1362" dimensionType="groupSizeEncoding" blockLength="24">
+            <field name="FillPx"        id="1364" type="PRICE9" offset="0"/>
+            <field name="FillQty"       id="1365" type="uInt32" offset="8"/>
+            <field name="FillExecID"    id="1363" type="String8" offset="12"/>
+            <field name="TradeAddendum" id="7001" type="uInt8" offset="20"/>
+        </group>
+    </sbe:message>
+
+    <!-- ExecutionReportModify (exchange -> client) -->
+    <sbe:message name="ExecutionReportModify531" id="531" description="Order modified" blockLength="134">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="CumQty"                id="14"    type="uInt32" offset="116"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="120"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="124"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="128"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="129"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="130"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="131"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="132"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="133"/>
+        <field name="Location"              id="9537"  type="String5" offset="134"/>
+    </sbe:message>
+
+    <!-- ExecutionReportCancel (exchange -> client) -->
+    <sbe:message name="ExecutionReportCancel534" id="534" description="Order canceled" blockLength="134">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="Price"                 id="44"    type="PRICE9" offset="76"/>
+        <field name="StopPx"                id="99"    type="PRICE9" offset="84"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="92"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="100"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="108"/>
+        <field name="CumQty"                id="14"    type="uInt32" offset="116"/>
+        <field name="OrderQty"              id="38"    type="uInt32" offset="120"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="124"/>
+        <field name="OrdStatus"             id="39"    type="OrdStatusReq" offset="128"/>
+        <field name="ExecType"              id="150"   type="ExecTyp" offset="129"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="130"/>
+        <field name="OrdType"               id="40"    type="OrdTypeReq" offset="131"/>
+        <field name="TimeInForce"           id="59"    type="TimeInForceReq" offset="132"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="133"/>
+        <field name="Location"              id="9537"  type="String5" offset="134"/>
+    </sbe:message>
+
+    <!-- OrderCancelReject (exchange -> client) -->
+    <sbe:message name="OrderCancelReject535" id="535" description="Cancel/replace rejected" blockLength="108">
+        <field name="SeqNum"                id="9726"  type="uInt32" offset="0"/>
+        <field name="UUID"                  id="39001" type="UUID" offset="4"/>
+        <field name="ExecID"                id="17"    type="String8" offset="12"/>
+        <field name="SenderID"              id="5392"  type="String20" offset="20"/>
+        <field name="ClOrdID"               id="11"    type="String20" offset="40"/>
+        <field name="PartyDetailsListReqID" id="1505"  type="uInt64" offset="60"/>
+        <field name="OrderID"               id="37"    type="uInt64" offset="68"/>
+        <field name="TransactTime"          id="60"    type="uInt64" offset="76"/>
+        <field name="SendingTimeEpoch"      id="5297"  type="uInt64" offset="84"/>
+        <field name="OrderRequestID"        id="2422"  type="uInt64" offset="92"/>
+        <field name="SecurityID"            id="48"    type="Int32" offset="100"/>
+        <field name="CxlRejReason"          id="102"   type="CxlRejRsn" offset="104"/>
+        <field name="Side"                  id="54"    type="SideReq" offset="106"/>
+        <field name="ManualOrderIndicator"  id="1028"  type="ManualOrdIndReq" offset="107"/>
+        <field name="Location"              id="9537"  type="String5" offset="108"/>
+    </sbe:message>
+
+</sbe:messageSchema>

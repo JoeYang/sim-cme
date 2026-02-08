@@ -1,0 +1,59 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Base types and utilities — no external deps
+cc_library(
+    name = "common_base",
+    hdrs = [
+        "types.h",
+        "clock.h",
+        "endian_utils.h",
+        "buffer_pool.h",
+        "mpsc_queue.h",
+    ],
+    includes = [".."],
+)
+
+# Logger — depends on spdlog
+cc_library(
+    name = "logger",
+    hdrs = ["logger.h"],
+    includes = [".."],
+    deps = [
+        "@spdlog",
+    ],
+)
+
+# Asio compatibility layer — depends on Boost.Asio
+cc_library(
+    name = "asio_compat",
+    hdrs = ["asio_compat.h"],
+    includes = [".."],
+    deps = [
+        "@boost.asio",
+        "@boost.system",
+    ],
+)
+
+# SPSC queue wrapper — depends on SPSCQueue
+cc_library(
+    name = "spsc_queue",
+    hdrs = ["spsc_queue.h"],
+    includes = [".."],
+    deps = [
+        "@spscqueue",
+    ],
+)
+
+# Umbrella target aggregating all common sub-targets
+cc_library(
+    name = "common",
+    includes = [".."],
+    deps = [
+        ":common_base",
+        ":logger",
+        ":asio_compat",
+        ":spsc_queue",
+    ],
+)

@@ -1,0 +1,5 @@
+# Root BUILD file
+exports_files([
+    ".extensions.bzl",
+    "MODULE.bazel",
+])

@@ -1,0 +1,310 @@
+# CME Simulated Exchange Configuration
+
+network:
+  tcp_listen_address: "0.0.0.0"
+  tcp_listen_port: 9563
+  multicast_base_address: "239.1.1"
+  multicast_base_port: 14310
+  io_threads: 2
+
+engine:
+  mode: "full_matching"    # "full_matching" or "synthetic"
+  pcap_path: ""            # required when mode is "synthetic"
+  synthetic_fill_probability: 1.0
+  synthetic_fill_latency_ns: 1000
+
+risk:
+  max_order_qty: 10000
+  max_price_deviation_pct: 10.0
+  max_orders_per_second: 1000
+  max_position_per_session: 50000
+
+session:
+  hmac_enabled: false
+  hmac_key: "test_key"
+  keep_alive_interval_ms: 30000
+  max_sessions: 100
+  retransmit_buffer_size: 10000
+
+log_level: "info"
+
+# Market data channels
+# Feed A: .1/.2/.3 addresses, Feed B: .4/.5/.6 addresses
+channels:
+  - channel_id: 310
+    name: "ES/MES"
+    incremental_feed:
+      address_a: "239.1.1.1"
+      port_a: 14310
+      address_b: "239.1.1.4"
+      port_b: 14310
+    snapshot_feed:
+      address_a: "239.1.1.2"
+      port_a: 15310
+      address_b: "239.1.1.5"
+      port_b: 15310
+    instrument_def_feed:
+      address_a: "239.1.1.3"
+      port_a: 16310
+      address_b: "239.1.1.6"
+      port_b: 16310
+    symbols:
+      - ESH5
+      - ESM5
+      - MESH5
+      - MESM5
+
+  - channel_id: 311
+    name: "NQ/MNQ"
+    incremental_feed:
+      address_a: "239.1.1.1"
+      port_a: 14311
+      address_b: "239.1.1.4"
+      port_b: 14311
+    snapshot_feed:
+      address_a: "239.1.1.2"
+      port_a: 15311
+      address_b: "239.1.1.5"
+      port_b: 15311
+    instrument_def_feed:
+      address_a: "239.1.1.3"
+      port_a: 16311
+      address_b: "239.1.1.6"
+      port_b: 16311
+    symbols:
+      - NQH5
+      - NQM5
+      - MNQH5
+      - MNQM5
+
+  - channel_id: 312
+    name: "YM/MYM"
+    incremental_feed:
+      address_a: "239.1.1.1"
+      port_a: 14312
+      address_b: "239.1.1.4"
+      port_b: 14312
+    snapshot_feed:
+      address_a: "239.1.1.2"
+      port_a: 15312
+      address_b: "239.1.1.5"
+      port_b: 15312
+    instrument_def_feed:
+      address_a: "239.1.1.3"
+      port_a: 16312
+      address_b: "239.1.1.6"
+      port_b: 16312
+    symbols:
+      - YMH5
+      - YMM5
+      - MYMH5
+      - MYMM5
+
+  - channel_id: 313
+    name: "RTY/M2K"
+    incremental_feed:
+      address_a: "239.1.1.1"
+      port_a: 14313
+      address_b: "239.1.1.4"
+      port_b: 14313
+    snapshot_feed:
+      address_a: "239.1.1.2"
+      port_a: 15313
+      address_b: "239.1.1.5"
+      port_b: 15313
+    instrument_def_feed:
+      address_a: "239.1.1.3"
+      port_a: 16313
+      address_b: "239.1.1.6"
+      port_b: 16313
+    symbols:
+      - RTYH5
+      - RTYM5
+      - M2KH5
+      - M2KM5
+
+# Instrument definitions: front month (H5=Mar 2025) and back month (M5=Jun 2025)
+instruments:
+  # Channel 310: E-mini S&P 500
+  - symbol: ESH5
+    security_id: 1
+    channel_id: 310
+    tick_size: 0.25
+    contract_multiplier: 50.0
+    min_price_increment_amount: 12.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: ESM5
+    security_id: 2
+    channel_id: 310
+    tick_size: 0.25
+    contract_multiplier: 50.0
+    min_price_increment_amount: 12.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 310: Micro E-mini S&P 500
+  - symbol: MESH5
+    security_id: 3
+    channel_id: 310
+    tick_size: 0.25
+    contract_multiplier: 5.0
+    min_price_increment_amount: 1.25
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: MESM5
+    security_id: 4
+    channel_id: 310
+    tick_size: 0.25
+    contract_multiplier: 5.0
+    min_price_increment_amount: 1.25
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 311: E-mini NASDAQ-100
+  - symbol: NQH5
+    security_id: 5
+    channel_id: 311
+    tick_size: 0.25
+    contract_multiplier: 20.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: NQM5
+    security_id: 6
+    channel_id: 311
+    tick_size: 0.25
+    contract_multiplier: 20.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 311: Micro E-mini NASDAQ-100
+  - symbol: MNQH5
+    security_id: 7
+    channel_id: 311
+    tick_size: 0.25
+    contract_multiplier: 2.0
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: MNQM5
+    security_id: 8
+    channel_id: 311
+    tick_size: 0.25
+    contract_multiplier: 2.0
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 312: E-mini Dow
+  - symbol: YMH5
+    security_id: 9
+    channel_id: 312
+    tick_size: 1.0
+    contract_multiplier: 5.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: YMM5
+    security_id: 10
+    channel_id: 312
+    tick_size: 1.0
+    contract_multiplier: 5.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 312: Micro E-mini Dow
+  - symbol: MYMH5
+    security_id: 11
+    channel_id: 312
+    tick_size: 1.0
+    contract_multiplier: 0.5
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: MYMM5
+    security_id: 12
+    channel_id: 312
+    tick_size: 1.0
+    contract_multiplier: 0.5
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 313: E-mini Russell 2000
+  - symbol: RTYH5
+    security_id: 13
+    channel_id: 313
+    tick_size: 0.10
+    contract_multiplier: 50.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: RTYM5
+    security_id: 14
+    channel_id: 313
+    tick_size: 0.10
+    contract_multiplier: 50.0
+    min_price_increment_amount: 5.00
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01
+
+  # Channel 313: Micro E-mini Russell 2000
+  - symbol: M2KH5
+    security_id: 15
+    channel_id: 313
+    tick_size: 0.10
+    contract_multiplier: 5.0
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202503"
+    display_factor: 0.01
+
+  - symbol: M2KM5
+    security_id: 16
+    channel_id: 313
+    tick_size: 0.10
+    contract_multiplier: 5.0
+    min_price_increment_amount: 0.50
+    min_trade_vol: 1
+    max_trade_vol: 10000
+    maturity_month_year: "202506"
+    display_factor: 0.01

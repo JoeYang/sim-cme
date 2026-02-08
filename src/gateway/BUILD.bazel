@@ -1,0 +1,27 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "gateway",
+    srcs = [
+        "exec_report_builder.cpp",
+        "message_validator.cpp",
+        "order_entry_gateway.cpp",
+        "risk_manager.cpp",
+    ],
+    hdrs = [
+        "exec_report_builder.h",
+        "message_validator.h",
+        "order_entry_gateway.h",
+        "risk_manager.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:common_base",
+        "//src/config",
+        "//src/engine",
+        "//src/instruments",
+        "//src/sbe",
+    ],
+)

@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Header-only SBE codecs
+cc_library(
+    name = "sbe",
+    hdrs = [
+        "dispatcher.h",
+        "framing.h",
+        "ilink3_messages.h",
+        "mdp3_messages.h",
+        "message_header.h",
+        "packet_header.h",
+    ],
+    includes = [".."],
+    deps = [
+        "//src/common:common_base",
+    ],
+)

@@ -1,0 +1,3 @@
+# Marker BUILD file for third_party package.
+# Contains external BUILD files referenced by module extensions.
+exports_files(["spscqueue.BUILD"])

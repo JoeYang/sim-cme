@@ -1,0 +1,30 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "unit_tests",
+    srcs = [
+        "unit/test_fixp_session.cpp",
+        "unit/test_instrument_manager.cpp",
+        "unit/test_order_book.cpp",
+        "unit/test_sbe_codec.cpp",
+    ],
+    deps = [
+        "//src:sim_cme_exchange_lib",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "integration_tests",
+    srcs = [
+        "integration/test_fixp_lifecycle.cpp",
+        "integration/test_order_to_market_data.cpp",
+        "integration/test_snapshot_recovery.cpp",
+    ],
+    deps = [
+        "//src:sim_cme_exchange_lib",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
